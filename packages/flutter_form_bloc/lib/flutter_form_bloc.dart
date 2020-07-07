@@ -14,6 +14,7 @@ export 'src/radio_button_group_field_bloc.dart';
 export 'src/date_time/date_time_field_bloc_builder.dart';
 export 'src/date_time/time_field_bloc_builder.dart';
 export 'src/form_bloc_listener.dart';
+export 'src/searchable_list_form_bloc_builder.dart';
 export 'src/stepper/stepper_form_bloc_builder.dart';
 export 'src/can_show_field_bloc_builder.dart';
 export 'src/typedefs.dart';
