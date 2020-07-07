@@ -317,14 +317,16 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
                 Expanded(
                   child: ListView.builder(
                     itemCount: searchableList.length,
-                    padding: EdgeInsets.only(top: 8, left: 8, right: 8),
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
                           Navigator.pop(context, searchableList[index]);
                           _searchController.clear();
                         },
-                        child: widget.buildItem(searchableList[index]),
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: widget.buildItem(searchableList[index]),
+                        ),
                       );
                     },
                   ),
@@ -351,13 +353,12 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
   }
 
   _filterList(String query) {
-
     if (query.isNotEmpty) {
       setState(() {
         searchableList =
             widget.items.where((Value item) => widget.searchCondition(query, item)).toList();
       });
-    }else{
+    } else {
       searchableList = widget.items;
     }
   }
