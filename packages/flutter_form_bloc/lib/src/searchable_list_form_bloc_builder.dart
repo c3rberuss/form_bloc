@@ -293,24 +293,25 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
                   padding: EdgeInsets.only(left: 16, right: 16),
                   child: TextField(
                     controller: _searchController,
-                    decoration: widget.decoration.copyWith(hintText: widget.searchHint) ??
-                        InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: widget.searchHint,
-                          hintStyle: TextStyle(
-                            //color: HexColor(textColor),
-                            fontSize: 15,
-                          ),
-                          border: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(4),
-                            borderSide: BorderSide(
-                              style: BorderStyle.solid,
-                              color: Colors.red,
+                    decoration: widget.decoration != null
+                        ? widget.decoration.copyWith(hintText: widget.searchHint)
+                        : InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: widget.searchHint,
+                            hintStyle: TextStyle(
+                              //color: HexColor(textColor),
+                              fontSize: 15,
+                            ),
+                            border: UnderlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide(
+                                style: BorderStyle.solid,
+                                color: Colors.red,
+                              ),
                             ),
                           ),
-                        ),
                   ),
                 ),
                 Expanded(
