@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:flutter_form_bloc/src/utils/utils.dart';
 
-
 class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
-
   /// {@macro flutter_form_bloc.FieldBlocBuilder.fieldBloc}
   final SelectFieldBloc<Value, Object> selectFieldBloc;
 
@@ -48,11 +46,11 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
   final Widget Function(Value) itemBuilder;
   final String Function(Value) showSelected;
   final bool Function(String, Value) searchCondition;
-
-
   final bool showClearIcon;
-
   final Icon clearIcon;
+  final String searchHint;
+  final String title;
+  final InputDecoration searchDecoration;
 
   SearchableListFormBlocBuilder({
     Key key,
@@ -73,14 +71,17 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
     @required this.searchCondition,
     this.showClearIcon = true,
     this.clearIcon,
+    this.searchHint = "Search",
+    this.searchDecoration,
+    this.title = "Searchable List",
   });
 
   @override
   _SearchableListFormBlocBuilderState createState() => _SearchableListFormBlocBuilderState<Value>();
 }
 
-class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFormBlocBuilder<Value>> {
-
+class _SearchableListFormBlocBuilderState<Value>
+    extends State<SearchableListFormBlocBuilder<Value>> {
   FocusNode _focusNode = FocusNode();
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _focusNode;
@@ -104,7 +105,7 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
     }
   }
 
-  void _showList(BuildContext context) async{
+  void _showList(BuildContext context) async {
     FocusScope.of(context).requestFocus(FocusNode());
     var result = await showDialog<Value>(
       context: context,
@@ -114,6 +115,9 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
           items: widget.selectFieldBloc.state.items,
           buildItem: widget.itemBuilder,
           searchCondition: widget.searchCondition,
+          searchHint: widget.searchHint,
+          decoration: widget.searchDecoration,
+          title: widget.title,
         );
       },
     );
@@ -131,7 +135,6 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (widget.selectFieldBloc == null) {
@@ -144,14 +147,12 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
         fieldBloc: widget.selectFieldBloc,
         animate: widget.animateWhenCanShow,
         builder: (_, __) {
-          return BlocBuilder<SelectFieldBloc<Value, Object>,
-              SelectFieldBlocState<Value, Object>>(
+          return BlocBuilder<SelectFieldBloc<Value, Object>, SelectFieldBlocState<Value, Object>>(
             bloc: widget.selectFieldBloc,
             builder: (context, state) {
               final isEnabled = fieldBlocIsEnabled(
                 isEnabled: this.widget.isEnabled,
-                enableOnlyWhenFormBlocCanSubmit:
-                widget.enableOnlyWhenFormBlocCanSubmit,
+                enableOnlyWhenFormBlocCanSubmit: widget.enableOnlyWhenFormBlocCanSubmit,
                 fieldBlocState: state,
               );
 
@@ -183,8 +184,7 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
                   onTap: !isEnabled ? null : () => _showList(context),
                   child: InputDecorator(
                     decoration: _buildDecoration(context, state, isEnabled),
-                    isEmpty: state.value == null &&
-                        widget.decoration.hintText == null,
+                    isEmpty: state.value == null && widget.decoration.hintText == null,
                     child: child,
                   ),
                 ),
@@ -196,8 +196,8 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
     );
   }
 
-  InputDecoration _buildDecoration(BuildContext context,
-      SelectFieldBlocState<Value, Object> state, bool isEnabled) {
+  InputDecoration _buildDecoration(
+      BuildContext context, SelectFieldBlocState<Value, Object> state, bool isEnabled) {
     InputDecoration decoration = this.widget.decoration;
 
     decoration = decoration.copyWith(
@@ -211,41 +211,47 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
       suffixIcon: decoration.suffixIcon ??
           (widget.showClearIcon
               ? AnimatedOpacity(
-            duration: Duration(milliseconds: 400),
-            opacity:
-            widget.selectFieldBloc.state.value == null ? 0.0 : 1.0,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(25),
-              child: widget.clearIcon ?? Icon(Icons.clear),
-              onTap: widget.selectFieldBloc.state.value == null
-                  ? null
-                  : widget.selectFieldBloc.clear,
-            ),
-          )
+                  duration: Duration(milliseconds: 400),
+                  opacity: widget.selectFieldBloc.state.value == null ? 0.0 : 1.0,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(25),
+                    child: widget.clearIcon ?? Icon(Icons.clear),
+                    onTap: widget.selectFieldBloc.state.value == null
+                        ? null
+                        : widget.selectFieldBloc.clear,
+                  ),
+                )
               : null),
     );
 
     return decoration;
   }
-
 }
 
 class _DialogSearchable<Value> extends StatefulWidget {
-
   final List<Value> items;
   final Widget Function(Value) buildItem;
   final String Function(Value) showSelected;
   final bool Function(String, Value) searchCondition;
+  final String searchHint;
+  final InputDecoration decoration;
+  final String title;
 
-
-  _DialogSearchable({this.items, this.buildItem, this.showSelected, this.searchCondition});
+  _DialogSearchable({
+    @required this.items,
+    @required this.buildItem,
+    @required this.showSelected,
+    @required this.searchCondition,
+    @required this.searchHint,
+    @required this.decoration,
+    @required this.title,
+  });
 
   @override
   __DialogSearchableState<Value> createState() => __DialogSearchableState<Value>();
 }
 
 class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
-
   List<Value> searchableList;
   TextEditingController _searchController;
 
@@ -261,85 +267,82 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    return  Dialog(
+    return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
       insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          print(MediaQuery.of(context).viewInsets.bottom);
+          print(constraints.biggest.height);
 
-          return Wrap(
-            children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
-                    child: Text(
-                      "Hint",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
+          return Container(
+            height: constraints.biggest.height,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 16, right: 16),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "Search",
-                        hintStyle: TextStyle(
-                          //color: HexColor(textColor),
-                          fontSize: 15,
-                        ),
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.circular(4),
-                          borderSide: BorderSide(
-                            style: BorderStyle.solid,
-                            color: Colors.red,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: widget.decoration.copyWith(hintText: widget.searchHint) ??
+                        InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: widget.searchHint,
+                          hintStyle: TextStyle(
+                            //color: HexColor(textColor),
+                            fontSize: 15,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderRadius: BorderRadius.circular(4),
+                            borderSide: BorderSide(
+                              style: BorderStyle.solid,
+                              color: Colors.red,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
                   ),
-                  SizedBox(
-                    height: constraints.biggest.height * 0.7,
-                    child: ListView.builder(
-                      itemCount: searchableList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.pop(context, searchableList[index]);
-                            _searchController.clear();
-                          },
-                          child: widget.buildItem(searchableList[index]),
-                        );
-                      },
-                    ),
-                  ),
-                  Divider(),
-                  Container(
-                    height: constraints.biggest.height * 0.1,
-                    padding: EdgeInsets.only(right: 8, bottom: 8),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: FlatButton(
-                        onPressed: () {
-                          Navigator.pop(context);
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: searchableList.length,
+                    padding: EdgeInsets.only(top: 8, left: 8, right: 8),
+                    itemBuilder: (BuildContext context, int index) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.pop(context, searchableList[index]);
+                          _searchController.clear();
                         },
-                        child: Text("Cancelar"),
-                      ),
+                        child: widget.buildItem(searchableList[index]),
+                      );
+                    },
+                  ),
+                ),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 14, bottom: 8),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: FlatButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Cancelar"),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           );
         },
       ),
