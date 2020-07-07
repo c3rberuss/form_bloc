@@ -49,6 +49,11 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
   final String Function(Value) showSelected;
   final bool Function(String, Value) searchCondition;
 
+
+  final bool showClearIcon;
+
+  final Icon clearIcon;
+
   SearchableListFormBlocBuilder({
     Key key,
     @required this.selectFieldBloc,
@@ -66,6 +71,8 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
     @required this.showSelected,
     @required this.itemBuilder,
     @required this.searchCondition,
+    this.showClearIcon = true,
+    this.clearIcon,
   });
 
   @override
@@ -124,10 +131,103 @@ class _SearchableListFormBlocBuilderState<Value> extends State<SearchableListFor
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    if (widget.selectFieldBloc == null) {
+      return SizedBox();
+    }
+
+    return Focus(
+      focusNode: _effectiveFocusNode,
+      child: CanShowFieldBlocBuilder(
+        fieldBloc: widget.selectFieldBloc,
+        animate: widget.animateWhenCanShow,
+        builder: (_, __) {
+          return BlocBuilder<SelectFieldBloc<Value, Object>,
+              SelectFieldBlocState<Value, Object>>(
+            bloc: widget.selectFieldBloc,
+            builder: (context, state) {
+              final isEnabled = fieldBlocIsEnabled(
+                isEnabled: this.widget.isEnabled,
+                enableOnlyWhenFormBlocCanSubmit:
+                widget.enableOnlyWhenFormBlocCanSubmit,
+                fieldBlocState: state,
+              );
+
+              Widget child;
+
+              if (state.value == null && widget.decoration.hintText != null) {
+                child = Text(
+                  widget.decoration.hintText,
+                  style: widget.decoration.hintStyle,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: widget.decoration.hintMaxLines,
+                );
+              } else {
+                child = Text(
+                  widget.showSelected(state.value),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                  style: Style.getDefaultTextStyle(
+                    context: context,
+                    isEnabled: isEnabled,
+                  ),
+                );
+              }
+
+              return DefaultFieldBlocBuilderPadding(
+                padding: widget.padding,
+                child: GestureDetector(
+                  onTap: !isEnabled ? null : () => _showList(context),
+                  child: InputDecorator(
+                    decoration: _buildDecoration(context, state, isEnabled),
+                    isEmpty: state.value == null &&
+                        widget.decoration.hintText == null,
+                    child: child,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
+
+  InputDecoration _buildDecoration(BuildContext context,
+      SelectFieldBlocState<Value, Object> state, bool isEnabled) {
+    InputDecoration decoration = this.widget.decoration;
+
+    decoration = decoration.copyWith(
+      enabled: isEnabled,
+      errorText: Style.getErrorText(
+        context: context,
+        errorBuilder: widget.errorBuilder,
+        fieldBlocState: state,
+        fieldBloc: widget.selectFieldBloc,
+      ),
+      suffixIcon: decoration.suffixIcon ??
+          (widget.showClearIcon
+              ? AnimatedOpacity(
+            duration: Duration(milliseconds: 400),
+            opacity:
+            widget.selectFieldBloc.state.value == null ? 0.0 : 1.0,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(25),
+              child: widget.clearIcon ?? Icon(Icons.clear),
+              onTap: widget.selectFieldBloc.state.value == null
+                  ? null
+                  : widget.selectFieldBloc.clear,
+            ),
+          )
+              : null),
+    );
+
+    return decoration;
+  }
+
 }
 
 class _DialogSearchable<Value> extends StatefulWidget {
