@@ -351,13 +351,14 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
   }
 
   _filterList(String query) {
-    print(query);
 
     if (query.isNotEmpty) {
       setState(() {
         searchableList =
             widget.items.where((Value item) => widget.searchCondition(query, item)).toList();
       });
+    }else{
+      searchableList = widget.items;
     }
   }
 }
