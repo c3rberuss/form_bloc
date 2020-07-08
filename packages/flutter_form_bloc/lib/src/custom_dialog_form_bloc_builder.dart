@@ -107,6 +107,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
         nextFocusNode: widget.nextFocusNode,
         onChanged: (value) {
           widget.textFieldBloc.updateValue(widget.showSelected(value));
+          widget.textFieldBloc.updateExtraData(value);
           // Used for hide keyboard
           // FocusScope.of(context).requestFocus(FocusNode());
         },
