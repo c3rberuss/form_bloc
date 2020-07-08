@@ -43,7 +43,6 @@ class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
   /// {@macro  flutter_form_bloc.FieldBlocBuilder.animateWhenCanShow}
   final bool animateWhenCanShow;
 
-  final Widget Function(Value) itemBuilder;
   final String Function(Value) showSelected;
   final Future<Value> Function() getValueFromDialog;
   final bool showClearIcon;
@@ -64,7 +63,6 @@ class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
     this.focusNode,
     this.textAlign,
     @required this.showSelected,
-    @required this.itemBuilder,
     this.showClearIcon = true,
     this.clearIcon,
     @required this.getValueFromDialog,
