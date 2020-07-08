@@ -92,11 +92,11 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
 
   void _onFocusRequest() {
     if (_effectiveFocusNode.hasFocus) {
-      _showList(context);
+      _showDialog(context);
     }
   }
 
-  void _showList(BuildContext context) async {
+  void _showDialog(BuildContext context) async {
     FocusScope.of(context).requestFocus(FocusNode());
 
     var result = await widget.getValueFromDialog();
@@ -137,7 +137,8 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
 
               Widget child;
 
-              if (state.value == null || state.value.isEmpty && widget.decoration.hintText != null) {
+              if (state.value == null ||
+                  state.value.isEmpty && widget.decoration.hintText != null) {
                 child = Text(
                   widget.decoration.hintText,
                   style: widget.decoration.hintStyle,
@@ -160,10 +161,11 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
               return DefaultFieldBlocBuilderPadding(
                 padding: widget.padding,
                 child: GestureDetector(
-                  onTap: !isEnabled ? null : () => _showList(context),
+                  onTap: !isEnabled ? null : () => _showDialog(context),
                   child: InputDecorator(
                     decoration: _buildDecoration(context, state, isEnabled),
-                    isEmpty: state.value == null && widget.decoration.hintText == null,
+                    isEmpty: (state.value == null || state.value.isEmpty) &&
+                        widget.decoration.hintText == null,
                     child: child,
                   ),
                 ),
