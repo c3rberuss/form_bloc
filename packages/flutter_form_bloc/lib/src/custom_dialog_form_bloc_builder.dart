@@ -45,13 +45,9 @@ class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
 
   final Widget Function(Value) itemBuilder;
   final String Function(Value) showSelected;
-  final bool Function(String, Value) searchCondition;
   final Future<Value> Function() getValueFromDialog;
   final bool showClearIcon;
   final Icon clearIcon;
-  final String searchHint;
-  final String title;
-  final InputDecoration searchDecoration;
 
   CustomDialogFormBlocBuilder({
     Key key,
@@ -69,12 +65,8 @@ class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
     this.textAlign,
     @required this.showSelected,
     @required this.itemBuilder,
-    @required this.searchCondition,
     this.showClearIcon = true,
     this.clearIcon,
-    this.searchHint = "Search",
-    this.searchDecoration,
-    this.title = "Searchable List",
     @required this.getValueFromDialog,
   });
 
@@ -200,7 +192,10 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
           (widget.showClearIcon
               ? AnimatedOpacity(
                   duration: Duration(milliseconds: 400),
-                  opacity: widget.textFieldBloc.state.value == null ? 0.0 : 1.0,
+                  opacity: widget.textFieldBloc.state.value == null ||
+                          widget.textFieldBloc.state.value.isEmpty
+                      ? 0.0
+                      : 1.0,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(25),
                     child: widget.clearIcon ?? Icon(Icons.clear),
