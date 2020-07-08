@@ -233,7 +233,7 @@ class AllFieldsForm extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           cancelButtonBuilder: (func){
-                            return MaterialButton(child: Text("Cancelar jejejej"),onPressed:func);
+                            return MaterialButton(child: Text("Cancel"),onPressed:func);
                           },
                           showSelected: (item) {
                             return item != null ? item : "";
