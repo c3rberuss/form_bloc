@@ -4,7 +4,7 @@ import 'package:flutter_form_bloc/src/utils/utils.dart';
 
 class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
   /// {@macro flutter_form_bloc.FieldBlocBuilder.fieldBloc}
-  final TextFieldBloc textFieldBloc;
+  final InputFieldBloc inputFieldBloc;
 
   /// {@macro flutter_form_bloc.FieldBlocBuilder.errorBuilder}
   final FieldBlocErrorBuilder errorBuilder;
@@ -50,7 +50,7 @@ class CustomDialogFormBlocBuilder<Value> extends StatefulWidget {
 
   CustomDialogFormBlocBuilder({
     Key key,
-    @required this.textFieldBloc,
+    @required this.inputFieldBloc,
     this.enableOnlyWhenFormBlocCanSubmit = false,
     this.isEnabled = true,
     this.errorBuilder,
@@ -106,8 +106,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
         isEnabled: widget.isEnabled,
         nextFocusNode: widget.nextFocusNode,
         onChanged: (value) {
-          widget.textFieldBloc.updateValue(widget.showSelected(value));
-          widget.textFieldBloc.updateExtraData(value);
+          widget.inputFieldBloc.updateValue(value);
           // Used for hide keyboard
           // FocusScope.of(context).requestFocus(FocusNode());
         },
@@ -117,18 +116,18 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
 
   @override
   Widget build(BuildContext context) {
-    if (widget.textFieldBloc == null) {
+    if (widget.inputFieldBloc == null) {
       return SizedBox();
     }
 
     return Focus(
       focusNode: _effectiveFocusNode,
       child: CanShowFieldBlocBuilder(
-        fieldBloc: widget.textFieldBloc,
+        fieldBloc: widget.inputFieldBloc,
         animate: widget.animateWhenCanShow,
         builder: (_, __) {
-          return BlocBuilder<TextFieldBloc, TextFieldBlocState>(
-            bloc: widget.textFieldBloc,
+          return BlocBuilder<InputFieldBloc, InputFieldBlocState>(
+            bloc: widget.inputFieldBloc,
             builder: (context, state) {
               final isEnabled = fieldBlocIsEnabled(
                 isEnabled: this.widget.isEnabled,
@@ -148,7 +147,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
                 );
               } else {
                 child = Text(
-                  state.value,
+                  widget.showSelected(state.value),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
@@ -178,7 +177,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
     );
   }
 
-  InputDecoration _buildDecoration(BuildContext context, TextFieldBlocState state, bool isEnabled) {
+  InputDecoration _buildDecoration(BuildContext context, InputFieldBlocState state, bool isEnabled) {
     InputDecoration decoration = this.widget.decoration;
 
     decoration = decoration.copyWith(
@@ -187,22 +186,22 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
         context: context,
         errorBuilder: widget.errorBuilder,
         fieldBlocState: state,
-        fieldBloc: widget.textFieldBloc,
+        fieldBloc: widget.inputFieldBloc,
       ),
       suffixIcon: decoration.suffixIcon ??
           (widget.showClearIcon
               ? AnimatedOpacity(
                   duration: Duration(milliseconds: 400),
-                  opacity: widget.textFieldBloc.state.value == null ||
-                          widget.textFieldBloc.state.value.isEmpty
+                  opacity: widget.inputFieldBloc.state.value == null ||
+                          widget.inputFieldBloc.state.value.isEmpty
                       ? 0.0
                       : 1.0,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(25),
                     child: widget.clearIcon ?? Icon(Icons.clear),
-                    onTap: widget.textFieldBloc.state.value == null
+                    onTap: widget.inputFieldBloc.state.value == null
                         ? null
-                        : widget.textFieldBloc.clear,
+                        : widget.inputFieldBloc.clear,
                   ),
                 )
               : null),
