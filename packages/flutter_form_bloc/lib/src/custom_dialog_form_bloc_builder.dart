@@ -137,8 +137,8 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
 
               Widget child;
 
-              if (state.value == null ||
-                  state.value.isEmpty && widget.decoration.hintText != null) {
+              if ((state.value is String ? state.value.isEmpty : state.value == null) &&
+                  widget.decoration.hintText != null) {
                 child = Text(
                   widget.decoration.hintText,
                   style: widget.decoration.hintStyle,
@@ -164,7 +164,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
                   onTap: !isEnabled ? null : () => _showDialog(context),
                   child: InputDecorator(
                     decoration: _buildDecoration(context, state, isEnabled),
-                    isEmpty: (state.value == null || state.value.isEmpty) &&
+                    isEmpty: (state.value is String ? state.value.isEmpty : state.value == null) &&
                         widget.decoration.hintText == null,
                     child: child,
                   ),
@@ -177,7 +177,8 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
     );
   }
 
-  InputDecoration _buildDecoration(BuildContext context, InputFieldBlocState state, bool isEnabled) {
+  InputDecoration _buildDecoration(
+      BuildContext context, InputFieldBlocState state, bool isEnabled) {
     InputDecoration decoration = this.widget.decoration;
 
     decoration = decoration.copyWith(
@@ -192,10 +193,9 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
           (widget.showClearIcon
               ? AnimatedOpacity(
                   duration: Duration(milliseconds: 400),
-                  opacity: widget.inputFieldBloc.state.value == null ||
-                          widget.inputFieldBloc.state.value.isEmpty
-                      ? 0.0
-                      : 1.0,
+                  opacity: (widget.inputFieldBloc.state.value is String
+                      ? widget.inputFieldBloc.state.value.isEmpty
+                      : widget.inputFieldBloc.state.value == null) ? 0.0 : 1.0,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(25),
                     child: widget.clearIcon ?? Icon(Icons.clear),
