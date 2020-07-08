@@ -137,7 +137,7 @@ class _CustomDialogFormBlocBuilderState<Value> extends State<CustomDialogFormBlo
 
               Widget child;
 
-              if (state.value == null && widget.decoration.hintText != null) {
+              if (state.value == null || state.value.isEmpty && widget.decoration.hintText != null) {
                 child = Text(
                   widget.decoration.hintText,
                   style: widget.decoration.hintStyle,
