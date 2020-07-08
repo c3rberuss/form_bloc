@@ -15,14 +15,6 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
   /// {@macro flutter_form_bloc.FieldBlocBuilder.isEnabled}
   final bool isEnabled;
 
-  /// If `true` an empty item is showed at the top of the dropdown items,
-  /// and can be used for deselect.
-  final bool showEmptyItem;
-
-  /// The milliseconds for show the dropdown items when the keyboard is open
-  /// and closes. By default is 600 milliseconds.
-  final int millisecondsForShowDropdownItemsWhenKeyboardIsOpen;
-
   /// {@macro flutter_form_bloc.FieldBlocBuilder.padding}
   final EdgeInsetsGeometry padding;
 
@@ -43,14 +35,22 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
   /// {@macro  flutter_form_bloc.FieldBlocBuilder.animateWhenCanShow}
   final bool animateWhenCanShow;
 
-  final Widget Function(Value) itemBuilder;
+  final Widget Function(Value, int pos) itemBuilder;
   final String Function(Value) showSelected;
   final bool Function(String, Value) searchCondition;
   final bool showClearIcon;
   final Icon clearIcon;
   final String searchHint;
   final String title;
+  final String emptyItemsText;
+  final String cancelButtonText;
   final InputDecoration searchDecoration;
+  final ShapeBorder dialogShape;
+  final TextStyle titleStyle;
+  final Widget titleWidget;
+  final Widget emptyItemsWidget;
+  final Widget notFoundWidget;
+  final Widget Function(Function) cancelButtonBuilder;
 
   SearchableListFormBlocBuilder({
     Key key,
@@ -62,8 +62,6 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
     this.decoration = const InputDecoration(),
     @required this.animateWhenCanShow,
     this.nextFocusNode,
-    this.showEmptyItem = true,
-    this.millisecondsForShowDropdownItemsWhenKeyboardIsOpen = 600,
     this.focusNode,
     this.textAlign,
     @required this.showSelected,
@@ -74,6 +72,14 @@ class SearchableListFormBlocBuilder<Value> extends StatefulWidget {
     this.searchHint = "Search",
     this.searchDecoration,
     this.title = "Searchable List",
+    this.emptyItemsText = "No items to show",
+    this.cancelButtonText = "Cancel",
+    this.dialogShape,
+    this.titleStyle,
+    this.titleWidget,
+    this.emptyItemsWidget,
+    this.notFoundWidget,
+    this.cancelButtonBuilder,
   });
 
   @override
@@ -118,6 +124,14 @@ class _SearchableListFormBlocBuilderState<Value>
           searchHint: widget.searchHint,
           decoration: widget.searchDecoration,
           title: widget.title,
+          emptyItemsText: widget.emptyItemsText,
+          cancelButtonText: widget.cancelButtonText,
+          emptyItemsWidget: widget.emptyItemsWidget,
+          titleWidget: widget.titleWidget,
+          titleStyle: widget.titleStyle,
+          dialogShape: widget.dialogShape,
+          notFoundWidget: widget.notFoundWidget,
+          cancelButtonBuilder: widget.cancelButtonBuilder,
         );
       },
     );
@@ -230,12 +244,20 @@ class _SearchableListFormBlocBuilderState<Value>
 
 class _DialogSearchable<Value> extends StatefulWidget {
   final List<Value> items;
-  final Widget Function(Value) buildItem;
+  final Widget Function(Value, int pos) buildItem;
   final String Function(Value) showSelected;
   final bool Function(String, Value) searchCondition;
   final String searchHint;
   final InputDecoration decoration;
   final String title;
+  final String emptyItemsText;
+  final String cancelButtonText;
+  final ShapeBorder dialogShape;
+  final TextStyle titleStyle;
+  final Widget titleWidget;
+  final Widget emptyItemsWidget;
+  final Widget notFoundWidget;
+  final Widget Function(Function) cancelButtonBuilder;
 
   _DialogSearchable({
     @required this.items,
@@ -245,6 +267,14 @@ class _DialogSearchable<Value> extends StatefulWidget {
     @required this.searchHint,
     @required this.decoration,
     @required this.title,
+    @required this.emptyItemsText,
+    @required this.cancelButtonText,
+    @required this.dialogShape,
+    @required this.titleStyle,
+    @required this.titleWidget,
+    @required this.emptyItemsWidget,
+    @required this.notFoundWidget,
+    @required this.cancelButtonBuilder,
   });
 
   @override
@@ -268,80 +298,102 @@ class __DialogSearchableState<Value> extends State<_DialogSearchable<Value>> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: widget.dialogShape ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
       insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 16),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          print(constraints.biggest.height);
-
           return Container(
-            height: constraints.biggest.height,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 16),
-                  child: Text(
-                    widget.title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
+                  child: widget.titleWidget ??
+                      Text(
+                        widget.title,
+                        style: widget.titleStyle ??
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(left: 16, right: 16),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: widget.decoration != null
-                        ? widget.decoration.copyWith(hintText: widget.searchHint)
-                        : InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: widget.searchHint,
-                            hintStyle: TextStyle(
-                              //color: HexColor(textColor),
-                              fontSize: 15,
-                            ),
-                            border: UnderlineInputBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: BorderSide(
-                                style: BorderStyle.solid,
-                                color: Colors.red,
+                if (widget.items.isNotEmpty) ...[
+                  Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    child: TextField(
+                      enabled: widget.items.isNotEmpty,
+                      controller: _searchController,
+                      decoration: widget.decoration != null
+                          ? widget.decoration.copyWith(hintText: widget.searchHint)
+                          : InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: widget.searchHint,
+                              hintStyle: TextStyle(
+                                //color: HexColor(textColor),
+                                fontSize: 15,
+                              ),
+                              border: UnderlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                                borderSide: BorderSide(
+                                  style: BorderStyle.solid,
+                                  color: Colors.red,
+                                ),
                               ),
                             ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: searchableList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.pop(context, searchableList[index]);
+                            _searchController.clear();
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: widget.buildItem(searchableList[index], index),
                           ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: searchableList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pop(context, searchableList[index]);
-                          _searchController.clear();
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(8),
-                          child: widget.buildItem(searchableList[index]),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                ] else if (searchableList.isEmpty && _searchController.text.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                    child: Center(
+                      child: widget.notFoundWidget ?? Text("Items not found!"),
+                    ),
+                  )
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                    child: Center(
+                      child: widget.emptyItemsWidget ?? Text(widget.emptyItemsText),
+                    ),
+                  )
+                ],
                 Divider(),
                 Padding(
                   padding: const EdgeInsets.only(right: 14, bottom: 8),
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: FlatButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text("Cancelar"),
-                    ),
+                    child: widget.cancelButtonBuilder != null
+                        ? widget.cancelButtonBuilder(() {
+                            Navigator.pop(context);
+                          })
+                        : FlatButton(
+                            shape: widget.dialogShape,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(widget.cancelButtonText),
+                          ),
                   ),
                 ),
               ],

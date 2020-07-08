@@ -45,6 +45,10 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
 
   final time1 = InputFieldBloc<TimeOfDay, Object>();
 
+  final seachable = SelectFieldBloc<String, Object>(
+      items: ["example", "abc", "another", "its", "apple"],
+      );
+
   AllFieldsFormBloc() {
     addFieldBlocs(fieldBlocs: [
       text1,
@@ -56,6 +60,7 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
       date1,
       dateAndTime1,
       time1,
+      seachable,
     ]);
   }
 
@@ -69,6 +74,7 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
     date1.addError('Awesome Error!');
     dateAndTime1.addError('Awesome Error!');
     time1.addError('Awesome Error!');
+    seachable.addError("Error meco");
   }
 
   @override
@@ -102,7 +108,7 @@ class AllFieldsForm extends StatelessWidget {
             ),
             child: Scaffold(
               appBar: AppBar(title: Text('Built-in Widgets')),
-              floatingActionButton: Column(
+              /*floatingActionButton: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   FloatingActionButton.extended(
@@ -119,7 +125,7 @@ class AllFieldsForm extends StatelessWidget {
                     label: Text('SUBMIT'),
                   ),
                 ],
-              ),
+              ),*/
               body: FormBlocListener<AllFieldsFormBloc, String, String>(
                 onSubmitting: (context, state) {
                   LoadingDialog.show(context);
@@ -127,14 +133,13 @@ class AllFieldsForm extends StatelessWidget {
                 onSuccess: (context, state) {
                   LoadingDialog.hide(context);
 
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => SuccessScreen()));
+                  Navigator.of(context)
+                      .pushReplacement(MaterialPageRoute(builder: (_) => SuccessScreen()));
                 },
                 onFailure: (context, state) {
                   LoadingDialog.hide(context);
 
-                  Scaffold.of(context).showSnackBar(
-                      SnackBar(content: Text(state.failureResponse)));
+                  Scaffold.of(context).showSnackBar(SnackBar(content: Text(state.failureResponse)));
                 },
                 child: SingleChildScrollView(
                   physics: ClampingScrollPhysics(),
@@ -221,6 +226,25 @@ class AllFieldsForm extends StatelessWidget {
                             child: Text('CheckboxFieldBlocBuilder'),
                           ),
                         ),
+                        SearchableListFormBlocBuilder<String>(
+                          selectFieldBloc: formBloc.seachable,
+                          animateWhenCanShow: true,
+                          dialogShape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          cancelButtonBuilder: (func){
+                            return MaterialButton(child: Text("Cancelar jejejej"),onPressed:func);
+                          },
+                          showSelected: (item) {
+                            return item != null ? item : "";
+                          },
+                          itemBuilder: (item, index) {
+                            return Text(item);
+                          },
+                          searchCondition: (query, item) {
+                            return item.toLowerCase().contains(query.toLowerCase());
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -283,8 +307,8 @@ class SuccessScreen extends StatelessWidget {
             ),
             SizedBox(height: 10),
             RaisedButton.icon(
-              onPressed: () => Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => AllFieldsForm())),
+              onPressed: () => Navigator.of(context)
+                  .pushReplacement(MaterialPageRoute(builder: (_) => AllFieldsForm())),
               icon: Icon(Icons.replay),
               label: Text('AGAIN'),
             ),
