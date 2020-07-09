@@ -18,4 +18,5 @@ export 'src/searchable_list_form_bloc_builder.dart';
 export 'src/custom_dialog_form_bloc_builder.dart';
 export 'src/stepper/stepper_form_bloc_builder.dart';
 export 'src/can_show_field_bloc_builder.dart';
+export 'src/custom_toggle_field_bloc_builder.dart';
 export 'src/typedefs.dart';

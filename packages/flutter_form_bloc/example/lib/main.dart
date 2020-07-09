@@ -24,6 +24,8 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
 
   final boolean2 = BooleanFieldBloc();
 
+  final toggle = BooleanFieldBloc();
+
   final select1 = SelectFieldBloc(
     items: ['Option 1', 'Option 2'],
   );
@@ -46,8 +48,8 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
   final time1 = InputFieldBloc<TimeOfDay, Object>();
 
   final seachable = SelectFieldBloc<String, Object>(
-      items: ["example", "abc", "another", "its", "apple"],
-      );
+    items: ["example", "abc", "another", "its", "apple"],
+  );
 
   AllFieldsFormBloc() {
     addFieldBlocs(fieldBlocs: [
@@ -61,6 +63,7 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
       dateAndTime1,
       time1,
       seachable,
+      toggle,
     ]);
   }
 
@@ -232,8 +235,8 @@ class AllFieldsForm extends StatelessWidget {
                           dialogShape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          cancelButtonBuilder: (func){
-                            return MaterialButton(child: Text("Cancel"),onPressed:func);
+                          cancelButtonBuilder: (func) {
+                            return MaterialButton(child: Text("Cancel"), onPressed: func);
                           },
                           showSelected: (item) {
                             return item != null ? item : "";
@@ -243,6 +246,17 @@ class AllFieldsForm extends StatelessWidget {
                           },
                           searchCondition: (query, item) {
                             return item.toLowerCase().contains(query.toLowerCase());
+                          },
+                        ),
+                        CustomToggleFieldBlocBuilder(
+                          booleanFieldBloc: formBloc.toggle,
+                          toggleBuilder: (value, onChanged) {
+                            return Row(
+                              children: <Widget>[
+                                Switch(value: value, onChanged: onChanged),
+                                Expanded(child: Text("Toggle")),
+                              ],
+                            );
                           },
                         ),
                       ],
