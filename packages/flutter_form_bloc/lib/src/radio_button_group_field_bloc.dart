@@ -17,6 +17,7 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
     this.decoration = const InputDecoration(),
     this.canDeselect = true,
     this.nextFocusNode,
+    this.scrollDirection = Axis.vertical,
     this.animateWhenCanShow = true,
   })  : assert(enableOnlyWhenFormBlocCanSubmit != null),
         assert(isEnabled != null),
@@ -54,6 +55,8 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
 
   /// {@macro  flutter_form_bloc.FieldBlocBuilder.animateWhenCanShow}
   final bool animateWhenCanShow;
+
+  final Axis scrollDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +119,7 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 4),
       shrinkWrap: true,
       physics: ClampingScrollPhysics(),
+      scrollDirection: scrollDirection,
       itemCount: state.items.length,
       itemBuilder: (context, index) {
         return InputDecorator(
