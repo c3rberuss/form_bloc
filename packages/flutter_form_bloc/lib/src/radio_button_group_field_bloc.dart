@@ -118,7 +118,7 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
     return ListView.builder(
       padding: EdgeInsets.symmetric(vertical: 4),
       shrinkWrap: true,
-      physics: scrollDirection != Axis.horizontal ? ClampingScrollPhysics() : null,
+      physics: ClampingScrollPhysics(),
       scrollDirection: scrollDirection,
       itemCount: state.items.length,
       itemBuilder: (context, index) {
