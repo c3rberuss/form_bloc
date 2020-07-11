@@ -139,6 +139,7 @@ class _DateTimeFieldBlocBuilderBaseState<T>
     } else if (widget.type == DateTimeFieldBlocBuilderBaseType.time) {
       result = await _showTimePicker(context);
     }
+
     if (result != null) {
       fieldBlocBuilderOnChange<T>(
         isEnabled: widget.isEnabled,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/src/can_show_field_bloc_builder.dart';
@@ -18,7 +19,6 @@ class CheckboxGroupFieldBlocBuilder<Value> extends StatelessWidget {
     this.checkColor,
     this.activeColor,
     this.nextFocusNode,
-    this.scrollDirection = Axis.vertical,
     this.animateWhenCanShow = true,
   })  : assert(enableOnlyWhenFormBlocCanSubmit != null),
         assert(isEnabled != null),
@@ -57,8 +57,6 @@ class CheckboxGroupFieldBlocBuilder<Value> extends StatelessWidget {
 
   /// {@macro  flutter_form_bloc.FieldBlocBuilder.animateWhenCanShow}
   final bool animateWhenCanShow;
-
-  final Axis scrollDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -116,12 +114,12 @@ class CheckboxGroupFieldBlocBuilder<Value> extends StatelessWidget {
       shrinkWrap: true,
       physics: ClampingScrollPhysics(),
       itemCount: state.items.length,
-      scrollDirection: scrollDirection,
       itemBuilder: (context, index) {
         final item = state.items[index];
         return InputDecorator(
           decoration: Style.inputDecorationWithoutBorder.copyWith(
             prefixIcon: Checkbox(
+              visualDensity: VisualDensity.compact,
               checkColor: Style.getIconColor(
                 customColor: checkColor,
                 defaultColor: Theme.of(context).toggleableActiveColor,

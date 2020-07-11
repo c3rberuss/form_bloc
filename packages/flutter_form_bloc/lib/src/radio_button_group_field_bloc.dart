@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
@@ -17,7 +18,6 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
     this.decoration = const InputDecoration(),
     this.canDeselect = true,
     this.nextFocusNode,
-    this.scrollDirection = Axis.vertical,
     this.animateWhenCanShow = true,
   })  : assert(enableOnlyWhenFormBlocCanSubmit != null),
         assert(isEnabled != null),
@@ -56,8 +56,6 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
   /// {@macro  flutter_form_bloc.FieldBlocBuilder.animateWhenCanShow}
   final bool animateWhenCanShow;
 
-  final Axis scrollDirection;
-
   @override
   Widget build(BuildContext context) {
     if (selectFieldBloc == null) {
@@ -68,8 +66,7 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
       fieldBloc: selectFieldBloc,
       animate: animateWhenCanShow,
       builder: (_, __) {
-        return BlocBuilder<SelectFieldBloc<Value, dynamic>,
-            SelectFieldBlocState<Value, dynamic>>(
+        return BlocBuilder<SelectFieldBloc<Value, dynamic>, SelectFieldBlocState<Value, dynamic>>(
           bloc: selectFieldBloc,
           builder: (context, state) {
             final isEnabled = fieldBlocIsEnabled(
@@ -108,20 +105,52 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
     );
   }
 
-  Widget _buildRadioButtons(
-      SelectFieldBlocState<Value, dynamic> state, bool isEnable) {
+  Widget _buildRadioButtons(SelectFieldBlocState<Value, dynamic> state, bool isEnable) {
     final onChanged = fieldBlocBuilderOnChange<Value>(
       isEnabled: isEnabled,
       nextFocusNode: nextFocusNode,
       onChanged: selectFieldBloc.updateValue,
     );
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       shrinkWrap: true,
       physics: ClampingScrollPhysics(),
-      scrollDirection: scrollDirection,
       itemCount: state.items.length,
       itemBuilder: (context, index) {
+        return Row(
+          children: <Widget>[
+            Stack(
+              children: <Widget>[
+                Radio<Value>(
+                  value: state.items.elementAt(index),
+                  groupValue: state.value,
+                  visualDensity: VisualDensity.compact,
+                  onChanged: onChanged,
+                ),
+                if (canDeselect && state.items.elementAt(index) == state.value)...[
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      unselectedWidgetColor: Colors.transparent,
+                    ),
+                    child: Radio<Value>(
+                      value: null,
+                      visualDensity: VisualDensity.compact,
+                      groupValue: state.value,
+                      onChanged: onChanged,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            Expanded(
+              child: DefaultFieldBlocBuilderTextStyle(
+                isEnabled: isEnabled,
+                child: Text(itemBuilder(context, state.items.elementAt(index))),
+              ),
+            ),
+          ],
+        );
+
         return InputDecorator(
           decoration: Style.inputDecorationWithoutBorder.copyWith(
             prefixIcon: Stack(
@@ -154,8 +183,8 @@ class RadioButtonGroupFieldBlocBuilder<Value> extends StatelessWidget {
     );
   }
 
-  InputDecoration _buildDecoration(BuildContext context,
-      SelectFieldBlocState<Value, dynamic> state, bool isEnable) {
+  InputDecoration _buildDecoration(
+      BuildContext context, SelectFieldBlocState<Value, dynamic> state, bool isEnable) {
     InputDecoration decoration = this.decoration;
 
     return decoration.copyWith(
